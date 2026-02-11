@@ -11,7 +11,7 @@ import {
 import logo from "../assets/Passary-refractories-logo.png";
 import prasadPassary from "../assets/Pradeep-passary.png";
 import kavitPassary from "../assets/Kavit-passary.png";
-import bithalPassary from "../assets/bitthal-passary.png";
+import bithalPassary from "../assets/Bitthal-passary.png";
 import jaidhishPassary from "../assets/Jaidhish-passary.png";
 import whrb from "../assets/WasteHeatRecoveryBoiler.avif";
 import thermalPower from "../assets/thermalpowerplant.avif";
