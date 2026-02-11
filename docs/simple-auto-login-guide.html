@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSO Auto-Login Script for External Apps</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #0ea5e9;
+            border-bottom: 3px solid #0ea5e9;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            color: #333;
+            margin-top: 30px;
+        }
+
+        .alert {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            border-left: 4px solid;
+        }
+
+        .alert-info {
+            background: #e0f2fe;
+            border-color: #0ea5e9;
+            color: #075985;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            border-color: #22c55e;
+            color: #166534;
+        }
+
+        .alert-warning {
+            background: #fef3c7;
+            border-color: #f59e0b;
+            color: #92400e;
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .step {
+            background: #f8fafc;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 3px solid #0ea5e9;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🔐 Simple Auto-Login Script for External Apps</h1>
+
+        <div class="alert alert-info">
+            <strong>📌 Purpose:</strong> This script automatically fills and submits login forms when users navigate
+            from the Master Dashboard to your application.
+        </div>
+
+        <h2>✅ Quick Integration (Copy & Paste)</h2>
+
+        <div class="alert alert-success">
+            <strong>Step 1:</strong> Copy the script below and paste it into your application's HTML file, just before
+            the closing <code>&lt;/body&gt;</code> tag.
+        </div>
+
+        <pre><code>&lt;!-- SSO Auto-Login Script --&gt;
+&lt;script&gt;
+(function() {
+    console.log('🔐 SSO Auto-Login Script Loaded');
+    
+    // Function to get credentials from localStorage
+    function getCredentials() {
+        try {
+            const appCreds = localStorage.getItem('app_credentials');
+            if (appCreds) {
+                const creds = JSON.parse(appCreds);
+                return {
+                    username: creds.username,
+                    password: creds.password
+                };
+            }
+        } catch (e) {
+            console.error('Error reading credentials:', e);
+        }
+        return null;
+    }
+    
+    // Function to fill login form
+    function fillLoginForm() {
+        const creds = getCredentials();
+        
+        if (!creds || !creds.username || !creds.password) {
+            console.log('ℹ️ No credentials available for auto-login');
+            return false;
+        }
+        
+        console.log('🔍 Looking for login form...');
+        
+        // Common username field selectors
+        const usernameSelectors = [
+            'input[name="username"]',
+            'input[name="user"]',
+            'input[name="email"]',
+            'input[name="login"]',
+            'input[type="text"]',
+            'input[id*="user"]',
+            'input[id*="login"]'
+        ];
+        
+        // Common password field selectors
+        const passwordSelectors = [
+            'input[name="password"]',
+            'input[name="pass"]',
+            'input[type="password"]',
+            'input[id*="pass"]'
+        ];
+        
+        // Find username field
+        let usernameField = null;
+        for (const selector of usernameSelectors) {
+            usernameField = document.querySelector(selector);
+            if (usernameField) break;
+        }
+        
+        // Find password field
+        let passwordField = null;
+        for (const selector of passwordSelectors) {
+            passwordField = document.querySelector(selector);
+            if (passwordField) break;
+        }
+        
+        if (usernameField && passwordField) {
+            console.log('✅ Found login form fields');
+            
+            // Fill username
+            usernameField.value = creds.username;
+            usernameField.dispatchEvent(new Event('input', { bubbles: true }));
+            usernameField.dispatchEvent(new Event('change', { bubbles: true }));
+            
+            // Fill password
+            passwordField.value = creds.password;
+            passwordField.dispatchEvent(new Event('input', { bubbles: true }));
+            passwordField.dispatchEvent(new Event('change', { bubbles: true }));
+            
+            console.log('✅ Credentials filled');
+            
+            // Find and click submit button
+            const submitSelectors = [
+                'button[type="submit"]',
+                'input[type="submit"]',
+                'button.login-btn',
+                'button.submit-btn',
+                '#login-button',
+                '#submit-button'
+            ];
+            
+            let submitButton = null;
+            for (const selector of submitSelectors) {
+                submitButton = document.querySelector(selector);
+                if (submitButton) break;
+            }
+            
+            if (submitButton) {
+                setTimeout(() => {
+                    submitButton.click();
+                    console.log('✅ Login form submitted automatically');
+                }, 500);
+            } else {
+                // Try to submit the form directly
+                const form = usernameField.closest('form');
+                if (form) {
+                    setTimeout(() => {
+                        form.submit();
+                        console.log('✅ Login form submitted automatically');
+                    }, 500);
+                }
+            }
+            
+            return true;
+        } else {
+            console.log('ℹ️ No login form detected (might already be logged in)');
+            return false;
+        }
+    }
+    
+    // Try to fill form when page loads
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(fillLoginForm, 1000);
+        });
+    } else {
+        setTimeout(fillLoginForm, 1000);
+    }
+})();
+&lt;/script&gt;</code></pre>
+
+        <h2>📋 Alternative: For React Applications</h2>
+
+        <div class="step">
+            <strong>Step 1:</strong> Create a new file <code>src/utils/autoLogin.js</code>
+        </div>
+
+        <pre><code>// src/utils/autoLogin.js
+export const attemptAutoLogin = () => {
+    try {
+        const appCreds = localStorage.getItem('app_credentials');
+        if (!appCreds) return null;
+        
+        const creds = JSON.parse(appCreds);
+        return {
+            username: creds.username,
+            password: creds.password
+        };
+    } catch (e) {
+        console.error('Error reading credentials:', e);
+        return null;
+    }
+};
+
+export default attemptAutoLogin;</code></pre>
+
+        <div class="step">
+            <strong>Step 2:</strong> Use in your Login component
+        </div>
+
+        <pre><code>// In your LoginPage.jsx or Login component
+import { useEffect } from 'react';
+import attemptAutoLogin from './utils/autoLogin';
+
+function LoginPage() {
+    useEffect(() => {
+        // Try auto-login when component mounts
+        const creds = attemptAutoLogin();
+        if (creds && creds.username && creds.password) {
+            // Fill your form fields
+            setUsername(creds.username);
+            setPassword(creds.password);
+            
+            // Auto-submit after a short delay
+            setTimeout(() => {
+                handleLogin(creds.username, creds.password);
+            }, 1000);
+        }
+    }, []);
+    
+    // ... rest of your component
+}</code></pre>
+
+        <h2>🧪 Testing the Integration</h2>
+
+        <div class="alert alert-warning">
+            <strong>Testing Steps:</strong>
+            <ol>
+                <li>Log in to the Master Dashboard</li>
+                <li>Click on your application in the navigation bar</li>
+                <li>Your app should automatically fill and submit the login form</li>
+                <li>Check browser console for log messages starting with 🔐</li>
+            </ol>
+        </div>
+
+        <h2>🔍 Troubleshooting</h2>
+
+        <div class="step">
+            <strong>Problem:</strong> Auto-login not working
+            <br><strong>Solution:</strong>
+            <ul>
+                <li>Open browser console (F12)</li>
+                <li>Check if you see "🔐 SSO Auto-Login Script Loaded"</li>
+                <li>Verify credentials exist: <code>localStorage.getItem('app_credentials')</code></li>
+                <li>Check if login form fields match the selectors in the script</li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <strong>Problem:</strong> Form fields not being filled
+            <br><strong>Solution:</strong>
+            <ul>
+                <li>Inspect your login form HTML</li>
+                <li>Update the selectors in the script to match your form's field names/IDs</li>
+                <li>Example: If your username field is <code>&lt;input name="user_id"&gt;</code>, add
+                    <code>'input[name="user_id"]'</code> to usernameSelectors</li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <strong>Problem:</strong> Form filled but not submitting
+            <br><strong>Solution:</strong>
+            <ul>
+                <li>Check your submit button's HTML</li>
+                <li>Add your button's selector to submitSelectors array</li>
+                <li>Example: If button has class "btn-login", add <code>'button.btn-login'</code></li>
+            </ul>
+        </div>
+
+        <h2>🔒 Security Notes</h2>
+
+        <div class="alert alert-info">
+            <ul>
+                <li>✅ Credentials are stored in localStorage (same as your current login system)</li>
+                <li>✅ Works only when user is already logged into Master Dashboard</li>
+                <li>✅ Password is base64 encoded (not plain text)</li>
+                <li>⚠️ For production, consider implementing proper OAuth 2.0 or SAML</li>
+                <li>⚠️ Always use HTTPS in production</li>
+            </ul>
+        </div>
+
+        <h2>✨ Benefits</h2>
+
+        <ul>
+            <li>✅ <strong>Zero Code Changes:</strong> Just add one script tag</li>
+            <li>✅ <strong>Works Immediately:</strong> No backend changes needed</li>
+            <li>✅ <strong>Same Credentials:</strong> Uses the same username/password as Master Dashboard</li>
+            <li>✅ <strong>Automatic:</strong> Users don't need to type credentials again</li>
+            <li>✅ <strong>Compatible:</strong> Works with any HTML login form</li>
+        </ul>
+
+        <div class="alert alert-success">
+            <strong>🎉 That's it!</strong> Your application will now automatically log in users who come from the Master
+            Dashboard.
+        </div>
+    </div>
+</body>
+
+</html>

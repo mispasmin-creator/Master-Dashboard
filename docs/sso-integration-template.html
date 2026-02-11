@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSO Integration Template - Passary Refractories</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2563eb;
+            border-bottom: 3px solid #2563eb;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #1e40af;
+            margin-top: 30px;
+        }
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        .warning {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .info {
+            background: #dbeafe;
+            border-left: 4px solid #2563eb;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .success {
+            background: #d1fae5;
+            border-left: 4px solid #10b981;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        code {
+            background: #e5e7eb;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        ul {
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 SSO Integration Guide for External Applications</h1>
+        
+        <div class="info">
+            <strong>📋 Purpose:</strong> This template shows how to integrate your external applications with the Passary Master Dashboard SSO system for automatic login.
+        </div>
+
+        <h2>1. Overview</h2>
+        <p>When users navigate from the Master Dashboard to your application, SSO parameters are automatically added to the URL. Your application needs to:</p>
+        <ul>
+            <li>Detect SSO parameters in the URL</li>
+            <li>Validate the SSO token</li>
+            <li>Create a local session for the user</li>
+            <li>Redirect to the appropriate dashboard</li>
+        </ul>
+
+        <h2>2. SSO URL Parameters</h2>
+        <p>Your application will receive these parameters:</p>
+        <div class="code-block">
+?_sso=<strong>BASE64_ENCODED_TOKEN</strong>
+&_user=<strong>USERNAME</strong>
+&_app=<strong>APP_ID</strong>
+&_ts=<strong>TIMESTAMP</strong>
+&_src=passary_master_portal
+&_v=1.0
+&_role=<strong>USER_ROLE</strong>
+&_email=<strong>USER_EMAIL</strong>
+&auto_login=true
+        </div>
+
+        <h2>3. Implementation Steps</h2>
+
+        <h3>Step 1: Extract SSO Parameters</h3>
+        <div class="code-block">
+<pre>// JavaScript example
+function extractSSOParams() {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    return {
+        token: urlParams.get('_sso'),
+        username: urlParams.get('_user'),
+        appId: urlParams.get('_app'),
+        role: urlParams.get('_role'),
+        email: urlParams.get('_email'),
+        autoLogin: urlParams.get('auto_login') === 'true'
+    };
+}
+
+const ssoParams = extractSSOParams();
+console.log('SSO Parameters:', ssoParams);</pre>
+        </div>
+
+        <h3>Step 2: Validate SSO Token</h3>
+        <div class="code-block">
+<pre>// JavaScript example
+function validateSSOToken(token) {
+    if (!token) return { valid: false, error: 'No token' };
+    
+    try {
+        // Decode base64 token
+        const tokenData = JSON.parse(atob(token));
+        
+        // Check expiration
+        if (Date.now() > tokenData.expiresAt) {
+            return { valid: false, error: 'Token expired' };
+        }
+        
+        // Check required fields
+        if (!tokenData.userId || !tokenData.timestamp) {
+            return { valid: false, error: 'Invalid token structure' };
+        }
+        
+        return { 
+            valid: true, 
+            userData: tokenData 
+        };
+    } catch (error) {
+        return { valid: false, error: 'Token parsing failed' };
+    }
+}
+
+const validation = validateSSOToken(ssoParams.token);
+if (validation.valid) {
+    console.log('✅ Token is valid:', validation.userData);
+} else {
+    console.error('❌ Token validation failed:', validation.error);
+}</pre>
+        </div>
+
+        <h3>Step 3: Create Local Session</h3>
+        <div class="code-block">
+<pre>// JavaScript example
+function createSessionFromSSO(userData, ssoParams) {
+    // Store user data in localStorage
+    localStorage.setItem('user-name', ssoParams.username);
+    localStorage.setItem('role', ssoParams.role);
+    localStorage.setItem('email_id', ssoParams.email);
+    localStorage.setItem('sso_authenticated', 'true');
+    localStorage.setItem('login_timestamp', Date.now());
+    
+    // If using sessionStorage
+    sessionStorage.setItem('authenticated', 'true');
+    sessionStorage.setItem('user', JSON.stringify(userData));
+    
+    console.log('✅ Session created for:', ssoParams.username);
+}
+
+if (validation.valid) {
+    createSessionFromSSO(validation.userData, ssoParams);
+}</pre>
+        </div>
+
+        <h3>Step 4: Auto-Login and Redirect</h3>
+        <div class="code-block">
+<pre>// Complete auto-login flow
+function performAutoLogin() {
+    const ssoParams = extractSSOParams();
+    
+    // Check if auto-login is requested
+    if (!ssoParams.autoLogin || !ssoParams.token) {
+        console.log('No SSO auto-login requested');
+        return;
+    }
+    
+    console.log('🔐 Starting SSO auto-login...');
+    
+    // Validate token
+    const validation = validateSSOToken(ssoParams.token);
+    
+    if (!validation.valid) {
+        console.error('❌ SSO validation failed:', validation.error);
+        alert('SSO authentication failed. Please login manually.');
+        return;
+    }
+    
+    // Create session
+    createSessionFromSSO(validation.userData, ssoParams);
+    
+    // Clean URL (remove SSO parameters)
+    cleanSSOParamsFromUrl();
+    
+    // Redirect to dashboard
+    window.location.href = '/dashboard';
+    
+    console.log('✅ SSO auto-login successful');
+}
+
+// Run on page load
+document.addEventListener('DOMContentLoaded', performAutoLogin);</pre>
+        </div>
+
+        <h3>Step 5: Clean URL Parameters</h3>
+        <div class="code-block">
+<pre>// Remove SSO parameters from URL for cleaner browser history
+function cleanSSOParamsFromUrl() {
+    const url = new URL(window.location.href);
+    const params = url.searchParams;
+    
+    const ssoParams = [
+        '_sso', '_user', '_app', '_ts', '_src', '_v', 
+        '_role', '_email', 'auto_login', '_type', '_action', 
+        'redirect', 'mode', 'auth_type', 'auto_redirect'
+    ];
+    
+    ssoParams.forEach(param => params.delete(param));
+    
+    const newUrl = params.toString() 
+        ? `${url.pathname}?${params.toString()}` 
+        : url.pathname;
+    
+    window.history.replaceState({}, '', newUrl);
+}</pre>
+        </div>
+
+        <h2>4. Complete Integration Example</h2>
+        <div class="success">
+            <strong>✅ Full working example:</strong> Add this script to your application's main HTML or entry point.
+        </div>
+        
+        <div class="code-block">
+<pre>&lt;script&gt;
+(function() {
+    'use strict';
+    
+    // SSO Auto-Login Handler
+    const SSOHandler = {
+        extractParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return {
+                token: urlParams.get('_sso'),
+                username: urlParams.get('_user'),
+                appId: urlParams.get('_app'),
+                role: urlParams.get('_role') || 'user',
+                email: urlParams.get('_email') || '',
+                autoLogin: urlParams.get('auto_login') === 'true'
+            };
+        },
+        
+        validateToken(token) {
+            if (!token) return { valid: false };
+            try {
+                const data = JSON.parse(atob(token));
+                if (Date.now() > data.expiresAt) {
+                    return { valid: false, error: 'expired' };
+                }
+                return { valid: true, userData: data };
+            } catch (e) {
+                return { valid: false, error: 'invalid' };
+            }
+        },
+        
+        createSession(userData, params) {
+            localStorage.setItem('user-name', params.username);
+            localStorage.setItem('role', params.role);
+            localStorage.setItem('email_id', params.email);
+            localStorage.setItem('sso_authenticated', 'true');
+            sessionStorage.setItem('authenticated', 'true');
+        },
+        
+        cleanUrl() {
+            const url = new URL(window.location.href);
+            const ssoParams = ['_sso', '_user', '_app', '_ts', '_src', '_v', '_role', '_email', 'auto_login'];
+            ssoParams.forEach(p => url.searchParams.delete(p));
+            window.history.replaceState({}, '', url.searchParams.toString() ? 
+                `${url.pathname}?${url.searchParams}` : url.pathname);
+        },
+        
+        init() {
+            const params = this.extractParams();
+            
+            if (!params.autoLogin || !params.token) return;
+            
+            console.log('🔐 SSO Auto-Login initiated...');
+            
+            const validation = this.validateToken(params.token);
+            
+            if (!validation.valid) {
+                console.error('❌ SSO failed:', validation.error);
+                return;
+            }
+            
+            this.createSession(validation.userData, params);
+            this.cleanUrl();
+            
+            // Redirect to your app's dashboard
+            setTimeout(() => {
+                window.location.href = '/dashboard'; // Change to your dashboard route
+            }, 500);
+            
+            console.log('✅ SSO Auto-Login successful');
+        }
+    };
+    
+    // Run on page load
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => SSOHandler.init());
+    } else {
+        SSOHandler.init();
+    }
+})();
+&lt;/script&gt;</pre>
+        </div>
+
+        <h2>5. Testing Your Integration</h2>
+        <div class="info">
+            <strong>🧪 Testing Steps:</strong>
+            <ol>
+                <li>Log into the Master Dashboard</li>
+                <li>Click on your application in the navigation bar</li>
+                <li>Verify SSO parameters appear in the URL</li>
+                <li>Confirm automatic login occurs</li>
+                <li>Check that URL parameters are cleaned</li>
+                <li>Verify user session is created correctly</li>
+            </ol>
+        </div>
+
+        <h2>6. Framework-Specific Examples</h2>
+
+        <h3>React Example</h3>
+        <div class="code-block">
+<pre>// In your App.js or main component
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+function App() {
+    const navigate = useNavigate();
+    
+    useEffect(() => {
+        const handleSSO = () => {
+            const params = new URLSearchParams(window.location.search);
+            const ssoToken = params.get('_sso');
+            const autoLogin = params.get('auto_login') === 'true';
+            
+            if (autoLogin && ssoToken) {
+                try {
+                    const userData = JSON.parse(atob(ssoToken));
+                    
+                    // Store in localStorage
+                    localStorage.setItem('user-name', params.get('_user'));
+                    localStorage.setItem('role', params.get('_role'));
+                    
+                    // Navigate to dashboard
+                    navigate('/dashboard', { replace: true });
+                } catch (error) {
+                    console.error('SSO failed:', error);
+                }
+            }
+        };
+        
+        handleSSO();
+    }, [navigate]);
+    
+    return &lt;div&gt;{/* Your app */}&lt;/div&gt;;
+}</pre>
+        </div>
+
+        <h3>Vue.js Example</h3>
+        <div class="code-block">
+<pre>// In your main.js or App.vue
+export default {
+    mounted() {
+        this.handleSSO();
+    },
+    methods: {
+        handleSSO() {
+            const params = new URLSearchParams(window.location.search);
+            const ssoToken = params.get('_sso');
+            const autoLogin = params.get('auto_login') === 'true';
+            
+            if (autoLogin && ssoToken) {
+                try {
+                    const userData = JSON.parse(atob(ssoToken));
+                    
+                    localStorage.setItem('user-name', params.get('_user'));
+                    localStorage.setItem('role', params.get('_role'));
+                    
+                    this.$router.push('/dashboard');
+                } catch (error) {
+                    console.error('SSO failed:', error);
+                }
+            }
+        }
+    }
+}</pre>
+        </div>
+
+        <h2>7. Security Considerations</h2>
+        <div class="warning">
+            <strong>⚠️ Important Security Notes:</strong>
+            <ul>
+                <li><strong>HTTPS Only:</strong> Always use HTTPS in production</li>
+                <li><strong>Token Expiration:</strong> Tokens expire after 24 hours</li>
+                <li><strong>Validate Origin:</strong> In production, validate the source of SSO requests</li>
+                <li><strong>Secure Storage:</strong> Never log sensitive token data</li>
+                <li><strong>CORS:</strong> Configure proper CORS policies for your domain</li>
+            </ul>
+        </div>
+
+        <h2>8. Troubleshooting</h2>
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+            <tr style="background: #f3f4f6;">
+                <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Issue</th>
+                <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Solution</th>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;">Token validation fails</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">Check token expiration and format</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;">No SSO parameters in URL</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">Verify Master Dashboard SSO service is running</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;">Session not created</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">Check localStorage permissions and browser settings</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;">Redirect not working</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">Verify dashboard route exists in your app</td>
+            </tr>
+        </table>
+
+        <h2>9. Support</h2>
+        <div class="info">
+            <strong>📞 Need Help?</strong>
+            <p>For SSO integration support, contact your system administrator or refer to the Master Dashboard documentation.</p>
+        </div>
+    </div>
+</body>
+</html>
