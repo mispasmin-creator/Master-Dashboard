@@ -47,9 +47,6 @@ const LoginPage = () => {
     dispatch(loginUser(formData));
   };
 
- // In LoginPage.jsx, update this useEffect:
-// In LoginPage.jsx useEffect
-// LoginPage.jsx - Update the login success useEffect
 useEffect(() => {
   if (isLoggedIn && userData) {
     setIsLoginLoading(false);

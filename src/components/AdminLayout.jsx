@@ -6,7 +6,20 @@ import {
   Eye, EyeOff, Copy, Key, UserPlus,
   ChevronRight, AlertCircle, Save,
   ExternalLink, Lock, Unlock, RefreshCw,
-  BarChart3, Database, Grid, List, Mail, Phone
+  BarChart3, Database, Grid, List, Mail, Phone,
+  Award, TrendingUp, Clock, Calendar, MapPin,
+  Globe, Factory, Zap, Star, Heart, BookOpen,
+  Briefcase, Github, Linkedin, Twitter,
+  Instagram, Facebook, Youtube, MessageCircle,
+  Send, Mail as MailIcon, Phone as PhoneIcon,
+  MapPin as MapPinIcon, Clock as ClockIcon,
+  User, CheckCircle2, ClipboardList, Target,
+  Home, Settings2, UserCog, LineChart, Activity,
+  PieChart, Filter as FilterIcon, Download,
+  Upload, ShieldCheck, Server, Wifi, HardDrive,
+  Cpu, Monitor, Smartphone, Tablet, Laptop,
+  ChevronDown, ChevronUp, Menu, Bell, Search as SearchIcon,
+  HelpCircle, LogIn, Camera, Edit2, Map
 } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -20,19 +33,45 @@ import {
   updateUser,
   deleteUser
 } from "../redux/api/loginApi";
-import logo from "../assets/logo.png";
+import logo from "../assets/Passary-refractories-logo.png";
+
+// Brand colors matching the olive green Passary logo
+const BRAND = {
+  primary: "#6B8E23",       // olive green
+  primaryLight: "#8CB04E",  // lighter olive
+  primaryDark: "#4A5D23",   // darker olive
+  accent: "#DAA520",        // golden rod
+  surface: "#F5F7F2",       // light olive-tinted surface
+  text: "#2C3E50",          // dark slate
+  textLight: "#5D6D7E",     // lighter text
+  gradient: "linear-gradient(135deg, #4A5D23 0%, #6B8E23 50%, #8CB04E 100%)"
+};
+
+// Helper function to get fallback avatar
+const getFallbackAvatar = (name = "", size = 128) => {
+  let initials = "US";
+  if (name) {
+    const nameParts = name.split(' ');
+    if (nameParts.length >= 2) {
+      initials = (nameParts[0][0] + nameParts[1][0]).toUpperCase();
+    } else if (nameParts.length === 1 && nameParts[0].length >= 2) {
+      initials = nameParts[0].substring(0, 2).toUpperCase();
+    }
+  }
+  return `https://ui-avatars.com/api/?name=${initials}&background=${BRAND.primary.replace('#', '')}&color=fff&size=${size}&bold=true`;
+};
 
 function UnderConstruction() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4">
       <div className="text-center max-w-2xl">
         <div className="mb-8 relative">
-          <Construction className="w-32 h-32 mx-auto text-sky-500 animate-bounce" />
+          <Construction className="w-32 h-32 mx-auto animate-bounce" style={{ color: BRAND.primary }} />
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-40 h-40 bg-sky-100 rounded-full animate-ping opacity-20"></div>
+            <div className="w-40 h-40 rounded-full animate-ping opacity-20" style={{ background: BRAND.primary }}></div>
           </div>
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+        <h1 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: BRAND.primaryDark }}>
           Under Construction
         </h1>
         <p className="text-xl text-gray-600 mb-8">
@@ -55,7 +94,7 @@ export default function AdminLayout({ children }) {
   const navigate = useNavigate();
   const [systems, setSystems] = useState([]);
   const [allApps, setAllApps] = useState([]);
-  const [showSettingsPopup, setShowSettingsPopup] = useState(false);
+  const [showAdminPanel, setShowAdminPanel] = useState(false); // Changed from popup to panel
   const [showUserModal, setShowUserModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -92,7 +131,7 @@ export default function AdminLayout({ children }) {
 
   const DEFAULT_SYSTEMS = ["CHECKLIST COMBINED"];
 
-  // Add these helper functions in AdminLayout.jsx
+  // Add these helper functions
   const getSSOUrl = (baseUrl, appId) => {
     const ssoToken = localStorage.getItem('sso_token');
     const username = localStorage.getItem('user-name');
@@ -101,7 +140,6 @@ export default function AdminLayout({ children }) {
       return baseUrl;
     }
 
-    // Create app-specific parameters
     const params = new URLSearchParams({
       _sso: ssoToken,
       _user: username,
@@ -111,7 +149,6 @@ export default function AdminLayout({ children }) {
       _v: '1.0'
     });
 
-    // Add specific parameters based on app type
     if (appId.includes('FMS')) {
       params.append('_type', 'fms_sso');
       params.append('_action', 'auto_login');
@@ -124,7 +161,7 @@ export default function AdminLayout({ children }) {
     return `${baseUrl}${separator}${params.toString()}`;
   };
 
-  // Helper to convert Google Drive link to direct image URL (robust)
+  // Helper to convert Google Drive link to direct image URL
   const getDriveDirectUrl = (url) => {
     if (!url || url.trim() === '') return null;
     const cleanUrl = url.trim();
@@ -159,27 +196,7 @@ export default function AdminLayout({ children }) {
     );
   };
 
-  const simulateAutoLogin = (appId, appUrl) => {
-    // This function attempts to auto-login by modifying the iframe src
-    const ssoUrl = getSSOUrl(appUrl, appId);
-
-    // Check if this is a known app pattern
-    const knownApps = {
-      'FMS': {
-        loginField: 'username',
-        passwordField: 'password',
-        submitButton: 'input[type="submit"], button[type="submit"]'
-      },
-      'MIS': {
-        loginField: 'email',
-        passwordField: 'password',
-        submitButton: '.login-btn, #login-button'
-      }
-    };
-
-    // Return enhanced URL with hints
-    return ssoUrl;
-  }; const topNavRoutes = [
+  const topNavRoutes = [
     {
       id: "HOME",
       label: "HOME",
@@ -199,7 +216,6 @@ export default function AdminLayout({ children }) {
     }, 3000);
   };
 
-  // AdminLayout.jsx - Update handleRouteClick function
   const handleRouteClick = (url, id) => {
     setActiveRoute(id);
 
@@ -217,26 +233,18 @@ export default function AdminLayout({ children }) {
       setCurrentUrl("");
       setShowAdminDashboard(false);
     } else {
-      // ========== ADD SSO TO URL ==========
       const ssoToken = localStorage.getItem('sso_token');
       const username = localStorage.getItem('user-name');
 
       let authUrl = url;
 
       if (ssoToken && username) {
-        // Check if URL already has parameters
         const hasParams = url.includes('?');
         const separator = hasParams ? '&' : '?';
-
-        // Add SSO parameters
         authUrl = `${url}${separator}_sso=${encodeURIComponent(ssoToken)}&_user=${encodeURIComponent(username)}&_source=master_portal&_time=${Date.now()}`;
 
-        // For specific apps, add their expected parameters
         if (id.includes('APP')) {
-          // Add auto-login flag
           authUrl += '&auto_login=true';
-
-          // Add format based on app type
           if (id.includes('FMS')) {
             authUrl += '&redirect=dashboard&mode=sso';
           } else if (id.includes('MIS')) {
@@ -244,7 +252,6 @@ export default function AdminLayout({ children }) {
           }
         }
       }
-      // ========== END SSO MODIFICATIONS ==========
 
       setCurrentUrl(authUrl);
       setIsIframeVisible(true);
@@ -252,7 +259,6 @@ export default function AdminLayout({ children }) {
       setShowAdminDashboard(false);
     }
   };
-
 
   const handleLogout = () => {
     localStorage.removeItem("user-name");
@@ -311,14 +317,7 @@ export default function AdminLayout({ children }) {
       showToast("Failed to load systems", "error");
     }
   };
-  // In your loadSystems function or after fetching systems
-  const enhancedSystems = systems.map(system => ({
-    ...system,
-    ssoUrl: getSSOUrl(system.url, system.id),
-    autoLogin: true
-  }));
 
-  // Use enhancedSystems instead of systems for navigation
   // Load all users and calculate stats
   const loadAllUsers = async () => {
     try {
@@ -327,7 +326,6 @@ export default function AdminLayout({ children }) {
       const users = await fetchAllUsers();
       setAllUsers(users);
 
-      // Calculate user access stats
       const stats = {};
       users.forEach(user => {
         const accessibleApps = user.accessibleApps || 0;
@@ -336,7 +334,6 @@ export default function AdminLayout({ children }) {
           systems: []
         };
 
-        // Get which specific apps they have access to
         for (let i = 1; i <= 16; i++) {
           const appKey = `APP${i.toString().padStart(2, '0')}`;
           if (user[appKey]?.toLowerCase() === 'yes') {
@@ -350,7 +347,6 @@ export default function AdminLayout({ children }) {
 
       setUserAccessStats(stats);
 
-      // Calculate quick stats
       const totalUsers = users.length;
       const adminUsers = users.filter(u => u.role?.toLowerCase() === 'admin').length;
       const totalAccessibleApps = users.reduce((sum, user) => sum + (user.accessibleApps || 0), 0);
@@ -369,8 +365,6 @@ export default function AdminLayout({ children }) {
   };
 
   // Handle create user
-  // In your AdminLayout.jsx, update the handleSaveUser function:
-  // In your handleSaveUser function, fix the createUser call:
   const handleSaveUser = async (userData) => {
     try {
       setIsSavingSystem(true);
@@ -379,15 +373,11 @@ export default function AdminLayout({ children }) {
         await updateUser(editingUser.username || editingUser.id, userData);
         showToast("User updated successfully");
       } else {
-        // Fix: Pass the actual Google Apps Script URL directly
         await createUser(userData, "https://script.google.com/macros/s/AKfycbwLVsUjSId4P8R_ewx4YIYLf7Hr44js9rgoXsvl58hI66VUZjQPhfT7XW9UQnGRkS0U/exec");
         showToast("User created successfully");
       }
 
-      // Refresh data
       await loadAllUsers();
-
-      // Close modal and reset
       setShowUserModal(false);
       setEditingUser(null);
       setSelectedApps([]);
@@ -408,6 +398,7 @@ export default function AdminLayout({ children }) {
       setIsSavingSystem(false);
     }
   };
+
   // Handle delete user
   const handleDeleteUser = async (userId) => {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
@@ -485,7 +476,6 @@ export default function AdminLayout({ children }) {
     if (selectedUserForAccess && selectedUserForAccess.username) {
       const userStats = userAccessStats[selectedUserForAccess.username];
       if (userStats) {
-        // Convert system names to app IDs
         const userAppIds = userStats.systems.map(sysName => {
           const app = allApps.find(a => a.name === sysName);
           return app ? app.id : null;
@@ -552,515 +542,32 @@ export default function AdminLayout({ children }) {
     return matchesSearch && matchesRole;
   });
 
-  // Settings Popup Component
-  const SettingsPopup = () => (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white w-full max-w-5xl rounded-xl shadow-2xl overflow-hidden">
-        {/* Header */}
-        <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-sky-900 to-blue-800 text-white">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-                <Settings className="w-6 h-6" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold">Admin Control Panel</h2>
-                <p className="text-sky-100">Manage users, systems, and access permissions</p>
-              </div>
-            </div>
-            <button
-              onClick={() => setShowSettingsPopup(false)}
-              className="p-2 hover:bg-white/20 rounded-lg"
-            >
-              <X className="w-6 h-6" />
-            </button>
-          </div>
-
-          {/* Tabs */}
-          <div className="mt-4 flex space-x-1">
-            <button
-              onClick={() => setSettingsView("dashboard")}
-              className={`px-4 py-2 rounded-t-lg font-medium transition ${settingsView === "dashboard"
-                ? "bg-white text-sky-900"
-                : "text-sky-200 hover:text-white hover:bg-white/10"
-                }`}
-            >
-              <div className="flex items-center gap-2">
-                <BarChart3 className="w-4 h-4" />
-                Dashboard
-              </div>
-            </button>
-            <button
-              onClick={() => setSettingsView("users")}
-              className={`px-4 py-2 rounded-t-lg font-medium transition ${settingsView === "users"
-                ? "bg-white text-sky-900"
-                : "text-sky-200 hover:text-white hover:bg-white/10"
-                }`}
-            >
-              <div className="flex items-center gap-2">
-                <Users className="w-4 h-4" />
-                Users ({quickStats.totalUsers})
-              </div>
-            </button>
-            <button
-              onClick={() => setSettingsView("systems")}
-              className={`px-4 py-2 rounded-t-lg font-medium transition ${settingsView === "systems"
-                ? "bg-white text-sky-900"
-                : "text-sky-200 hover:text-white hover:bg-white/10"
-                }`}
-            >
-              <div className="flex items-center gap-2">
-                <Database className="w-4 h-4" />
-                Systems ({quickStats.totalSystems})
-              </div>
-            </button>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="max-h-[70vh] overflow-y-auto">
-          {/* Dashboard View */}
-          {settingsView === "dashboard" && (
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <div className="bg-gradient-to-br from-blue-50 to-sky-50 rounded-xl p-5 border border-blue-100">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600">Total Users</p>
-                      <p className="text-3xl font-bold text-gray-900">{quickStats.totalUsers}</p>
-                    </div>
-                    <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                      <Users className="w-6 h-6 text-blue-600" />
-                    </div>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-2">
-                    Registered in system
-                  </p>
-                </div>
-
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-5 border border-green-100">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600">Total Systems</p>
-                      <p className="text-3xl font-bold text-gray-900">{quickStats.totalSystems}</p>
-                    </div>
-                    <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                      <Database className="w-6 h-6 text-green-600" />
-                    </div>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-2">
-                    Available applications
-                  </p>
-                </div>
-
-                <div className="bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl p-5 border border-purple-100">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600">Admin Users</p>
-                      <p className="text-3xl font-bold text-gray-900">{quickStats.adminUsers}</p>
-                    </div>
-                    <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
-                      <Shield className="w-6 h-6 text-purple-600" />
-                    </div>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-2">
-                    With admin privileges
-                  </p>
-                </div>
-
-                <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl p-5 border border-orange-100">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600">Avg Apps/User</p>
-                      <p className="text-3xl font-bold text-gray-900">{quickStats.avgAppsPerUser}</p>
-                    </div>
-                    <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
-                      <Grid className="w-6 h-6 text-orange-600" />
-                    </div>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-2">
-                    Average systems per user
-                  </p>
-                </div>
-              </div>
-
-              {/* Quick Actions */}
-              <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-5 border border-gray-200 mb-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <button
-                    onClick={() => {
-                      setSettingsView("users");
-                      setShowUserModal(true);
-                    }}
-                    className="flex items-center gap-3 p-4 bg-white border border-gray-200 rounded-lg hover:border-sky-300 hover:shadow transition"
-                  >
-                    <div className="w-10 h-10 rounded-lg bg-sky-100 flex items-center justify-center">
-                      <UserPlus className="w-5 h-5 text-sky-600" />
-                    </div>
-                    <div className="text-left">
-                      <p className="font-medium text-gray-900">Add New User</p>
-                      <p className="text-xs text-gray-500">Create new user account</p>
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={refreshData}
-                    className="flex items-center gap-3 p-4 bg-white border border-gray-200 rounded-lg hover:border-green-300 hover:shadow transition"
-                  >
-                    <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-                      <RefreshCw className="w-5 h-5 text-green-600" />
-                    </div>
-                    <div className="text-left">
-                      <p className="font-medium text-gray-900">Refresh Data</p>
-                      <p className="text-xs text-gray-500">Update from Google Sheets</p>
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={() => setSettingsView("systems")}
-                    className="flex items-center gap-3 p-4 bg-white border border-gray-200 rounded-lg hover:border-purple-300 hover:shadow transition"
-                  >
-                    <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
-                      <Database className="w-5 h-5 text-purple-600" />
-                    </div>
-                    <div className="text-left">
-                      <p className="font-medium text-gray-900">View All Systems</p>
-                      <p className="text-xs text-gray-500">{allApps.length} applications</p>
-                    </div>
-                  </button>
-                </div>
-              </div>
-
-              {/* Recent Activity */}
-              <div className="bg-white rounded-xl p-5 border border-gray-200">
-                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <Users className="w-5 h-5 text-sky-600" />
-                  Recent Users
-                </h3>
-                <div className="space-y-2">
-                  {allUsers.slice(0, 5).map(user => {
-                    const empD = findEmployeeData(user.employee_code || user.username);
-                    const photoUrl = empD ? getDriveDirectUrl(empD["Candidate's Photo"] || empD.photo || '') : null;
-                    const appCount = userAccessStats[user.username]?.accessibleApps || 0;
-                    return (
-                      <div key={user.username} className="flex items-center justify-between p-3 border border-gray-100 rounded-xl hover:bg-sky-50 hover:border-sky-200 transition-all">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border-2 border-sky-100 shadow-sm">
-                            {photoUrl ? (
-                              <img src={photoUrl} alt={user.name} className="w-full h-full object-cover"
-                                onError={(e) => { e.target.onerror = null; e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'U')}&background=6B8E23&color=fff&bold=true`; }} />
-                            ) : (
-                              <div className="w-full h-full bg-gradient-to-br from-sky-100 to-blue-200 flex items-center justify-center">
-                                <span className="font-extrabold text-sky-700 text-sm">{user.name?.charAt(0)?.toUpperCase() || 'U'}</span>
-                              </div>
-                            )}
-                          </div>
-                          <div>
-                            <p className="font-bold text-gray-900 text-sm">{user.name}</p>
-                            <p className="text-xs text-gray-400">{user.department || 'No Dept'} &bull; <span className="font-semibold" style={{ color: '#6B8E23' }}>{user.role || 'user'}</span></p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="px-2.5 py-1 bg-sky-50 text-sky-700 border border-sky-200 rounded-full text-xs font-bold">
-                            {appCount} {appCount === 1 ? 'App' : 'Apps'}
-                          </span>
-                          <button
-                            onClick={() => { setSelectedUserForAccess(user); setShowAccessModal(true); }}
-                            className="p-1.5 text-gray-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition"
-                          >
-                            <Settings className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Users View */}
-          {settingsView === "users" && (
-            <div className="p-6">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                <div>
-                  <h3 className="text-lg font-bold text-gray-900">User Management</h3>
-                  <p className="text-gray-600">Manage user accounts and permissions</p>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <div className="relative">
-                    <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="Search users..."
-                      className="pl-10 pr-4 py-2 border rounded-lg w-full sm:w-64"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                  </div>
-                  <select
-                    className="px-4 py-2 border rounded-lg"
-                    value={filterRole}
-                    onChange={(e) => setFilterRole(e.target.value)}
-                  >
-                    <option value="all">All Roles</option>
-                    <option value="admin">Admin</option>
-                    <option value="user">User</option>
-                    <option value="hr">HR</option>
-                    <option value="store">Store</option>
-                    <option value="accounts">Accounts</option>
-                  </select>
-                  <button
-                    onClick={() => {
-                      setEditingUser(null);
-                      setShowUserModal(true);
-                    }}
-                    className="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 flex items-center gap-2"
-                  >
-                    <UserPlus className="w-4 h-4" />
-                    Add User
-                  </button>
-                </div>
-              </div>
-
-              <div className="overflow-x-auto border border-gray-100 rounded-2xl shadow-sm">
-                <table className="w-full">
-                  <thead>
-                    <tr style={{ background: 'linear-gradient(90deg, #2d5c3c 0%, #4a7c59 100%)' }}>
-                      <th className="px-4 py-3.5 text-left text-xs font-bold text-white/90 uppercase tracking-wider">Photo & Code</th>
-                      <th className="px-4 py-3.5 text-left text-xs font-bold text-white/90 uppercase tracking-wider">Name & Dept</th>
-                      <th className="px-4 py-3.5 text-left text-xs font-bold text-white/90 uppercase tracking-wider">Contact</th>
-                      <th className="px-4 py-3.5 text-left text-xs font-bold text-white/90 uppercase tracking-wider">Role</th>
-                      <th className="px-4 py-3.5 text-left text-xs font-bold text-white/90 uppercase tracking-wider">System Access</th>
-                      <th className="px-4 py-3.5 text-left text-xs font-bold text-white/90 uppercase tracking-wider">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {filteredUsers.map((user, idx) => {
-                      const empData = findEmployeeData(user.employee_code || user.username);
-                      const photoUrl = empData ? getDriveDirectUrl(empData["Candidate's Photo"] || empData.photo || '') : null;
-                      const userStats = userAccessStats[user.username] || { accessibleApps: 0, systems: [] };
-                      const roleColors = {
-                        admin: { bg: 'bg-purple-100', text: 'text-purple-700', ring: 'ring-purple-200' },
-                        hr: { bg: 'bg-pink-100', text: 'text-pink-700', ring: 'ring-pink-200' },
-                        manager: { bg: 'bg-indigo-100', text: 'text-indigo-700', ring: 'ring-indigo-200' },
-                        store: { bg: 'bg-orange-100', text: 'text-orange-700', ring: 'ring-orange-200' },
-                        accounts: { bg: 'bg-yellow-100', text: 'text-yellow-700', ring: 'ring-yellow-200' },
-                      };
-                      const rc = roleColors[user.role?.toLowerCase()] || { bg: 'bg-sky-100', text: 'text-sky-700', ring: 'ring-sky-200' };
-
-                      return (
-                        <tr key={user.username} className={`hover:bg-green-50/40 transition-all duration-150 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
-                          {/* Photo + Code */}
-                          <td className="px-4 py-3.5 whitespace-nowrap">
-                            <div className="flex items-center gap-3">
-                              <div className="w-11 h-11 rounded-full overflow-hidden border-2 shadow-sm flex-shrink-0" style={{ borderColor: '#6B8E23' }}>
-                                {photoUrl ? (
-                                  <img
-                                    src={photoUrl}
-                                    alt={user.name}
-                                    className="w-full h-full object-cover"
-                                    onError={(e) => {
-                                      e.target.onerror = null;
-                                      e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'U')}&background=6B8E23&color=fff&bold=true`;
-                                    }}
-                                  />
-                                ) : (
-                                  <img
-                                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'U')}&background=6B8E23&color=fff&bold=true&size=80`}
-                                    alt={user.name}
-                                    className="w-full h-full object-cover"
-                                  />
-                                )}
-                              </div>
-                              <span className="font-mono text-[11px] bg-gray-100 px-2 py-1 rounded-lg border font-bold text-gray-600">
-                                {user.employee_code || 'N/A'}
-                              </span>
-                            </div>
-                          </td>
-                          {/* Name */}
-                          <td className="px-4 py-3.5 whitespace-nowrap">
-                            <div className="text-sm font-extrabold text-gray-900">{user.name || 'N/A'}</div>
-                            <div className="text-xs text-gray-400 font-medium mt-0.5">{user.department || 'No Department'}</div>
-                          </td>
-                          {/* Contact */}
-                          <td className="px-4 py-3.5 whitespace-nowrap">
-                            <div className="font-semibold text-gray-800 text-sm">{user.username}</div>
-                            {empData && (empData["Personal Email-Id"] || empData.email) && (
-                              <div className="text-xs text-sky-600 flex items-center gap-1 mt-1 font-medium">
-                                <Mail className="w-3 h-3" />
-                                <span className="truncate max-w-[140px]">{empData["Personal Email-Id"] || empData.email}</span>
-                              </div>
-                            )}
-                            {empData && (empData["Mobile No."] || empData["Mobile No"]) && (
-                              <div className="text-xs text-emerald-600 flex items-center gap-1 font-medium mt-0.5">
-                                <Phone className="w-3 h-3" />
-                                {empData["Mobile No."] || empData["Mobile No"]}
-                              </div>
-                            )}
-                          </td>
-                          {/* Role */}
-                          <td className="px-4 py-3.5 whitespace-nowrap">
-                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm ring-1 ${rc.bg} ${rc.text} ${rc.ring}`}>
-                              {user.role || 'User'}
-                            </span>
-                          </td>
-                          {/* Access */}
-                          <td className="px-4 py-3.5 whitespace-nowrap">
-                            <div className="flex flex-col gap-1">
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-base font-extrabold" style={{ color: '#6B8E23' }}>{userStats.accessibleApps}</span>
-                                <span className="text-xs text-gray-400">systems</span>
-                              </div>
-                              <button
-                                onClick={() => { setSelectedUserForAccess(user); setShowAccessModal(true); }}
-                                className="text-[11px] text-sky-600 hover:text-sky-800 font-bold underline decoration-sky-200 underline-offset-2"
-                              >
-                                Edit Access
-                              </button>
-                            </div>
-                          </td>
-                          {/* Actions */}
-                          <td className="px-4 py-3.5 whitespace-nowrap">
-                            <div className="flex items-center gap-1.5">
-                              <button
-                                onClick={() => { setEditingUser(user); setShowUserModal(true); }}
-                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all border border-transparent hover:border-blue-100"
-                                title="Edit User"
-                              >
-                                <Edit className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => handleDeleteUser(user.username)}
-                                className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all border border-transparent hover:border-red-100"
-                                title="Delete User"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* Systems View */}
-          {settingsView === "systems" && (
-            <div className="p-6">
-              <div className="mb-6">
-                <h3 className="text-lg font-bold text-gray-900">Available Systems</h3>
-                <p className="text-gray-600">{allApps.length} applications available for assignment</p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {allApps.map((app) => {
-                  const usersWithAccess = allUsers.filter(user => {
-                    for (let i = 1; i <= 16; i++) {
-                      const appKey = `APP${i.toString().padStart(2, '0')}`;
-                      if (appKey === app.id && user[appKey]?.toLowerCase() === 'yes') {
-                        return true;
-                      }
-                    }
-                    return false;
-                  });
-
-                  return (
-                    <div key={app.id} className="border rounded-lg p-4 hover:border-sky-300 hover:shadow transition">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-sky-100 to-blue-100 flex items-center justify-center">
-                            <Database className="w-5 h-5 text-sky-600" />
-                          </div>
-                          <div>
-                            <h4 className="font-bold text-gray-900">{app.label}</h4>
-                            <p className="text-xs text-gray-500">{app.id}</p>
-                          </div>
-                        </div>
-                        <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs">
-                          {usersWithAccess.length} users
-                        </span>
-                      </div>
-
-                      <a
-                        href={app.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-sky-600 hover:text-sky-800 mb-3 inline-flex items-center gap-1"
-                      >
-                        {app.url.length > 30 ? `${app.url.substring(0, 30)}...` : app.url}
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-
-                      {usersWithAccess.length > 0 && (
-                        <div className="mt-3 pt-3 border-t">
-                          <p className="text-xs text-gray-500 mb-2">Users with access:</p>
-                          <div className="flex flex-wrap gap-1">
-                            {usersWithAccess.slice(0, 3).map(user => (
-                              <span key={user.username} className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
-                                {user.name}
-                              </span>
-                            ))}
-                            {usersWithAccess.length > 3 && (
-                              <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
-                                +{usersWithAccess.length - 3} more
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="p-4 border-t border-gray-200 bg-gray-50">
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-500">
-              Last updated: {new Date().toLocaleTimeString()}
-            </div>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={refreshData}
-                className="px-4 py-2 text-sky-600 hover:text-sky-800 flex items-center gap-2"
-              >
-                <RefreshCw className="w-4 h-4" />
-                Refresh
-              </button>
-              <button
-                onClick={() => setShowSettingsPopup(false)}
-                className="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
+  // Compact Stat Card Component
+  const CompactStatCard = ({ icon: Icon, label, value, color = BRAND.primary, bgColor = `${BRAND.primary}15` }) => (
+    <div className="bg-white rounded-xl p-3 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 flex items-center gap-3">
+      <div className="p-2 rounded-lg flex-shrink-0" style={{ background: bgColor }}>
+        <Icon className="w-4 h-4" style={{ color }} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs text-gray-500 mb-0.5">{label}</p>
+        <p className="text-lg font-bold leading-none" style={{ color }}>{value}</p>
       </div>
     </div>
   );
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-white">
+      <div className="flex items-center justify-center min-h-screen" style={{ background: BRAND.surface }}>
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-sky-600"></div>
-          <p className="mt-4 text-gray-700 font-medium">Loading dashboard...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-t-transparent mx-auto" style={{ borderColor: BRAND.primary, borderTopColor: 'transparent' }}></div>
+          <p className="mt-4 font-medium" style={{ color: BRAND.primary }}>Loading dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-white">
+    <div className="flex flex-col h-screen overflow-hidden" style={{ background: BRAND.surface }}>
       {/* Header */}
       <header
         className={`bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm transition-transform duration-300 ${isHeaderVisible ? "translate-y-0" : "-translate-y-full"
@@ -1070,8 +577,8 @@ export default function AdminLayout({ children }) {
           <div className="flex items-center gap-3">
             <img src={logo} alt="Passary Refractories" className="h-10 w-auto" />
             <div className="hidden md:block">
-              <h1 className="text-lg font-bold" style={{ color: '#2d5c3c' }}>Passary Refractories</h1>
-              <p className="text-xs" style={{ color: '#4a7c59' }}>Employee Portal</p>
+              <h1 className="text-lg font-bold" style={{ color: BRAND.primaryDark }}>Passary Refractories</h1>
+              <p className="text-xs" style={{ color: BRAND.primary }}>Employee Portal</p>
             </div>
           </div>
 
@@ -1081,21 +588,22 @@ export default function AdminLayout({ children }) {
                 Welcome, {username || "User"}
               </span>
               {userRole && (
-                <span className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded">
+                <span className="text-xs px-2 py-1 rounded-full font-semibold text-white" style={{ background: BRAND.primary }}>
                   {userRole}
                 </span>
               )}
             </div>
 
-            {/* Settings Button (Replaces WhatsApp icon) */}
+            {/* Admin Panel Toggle Button */}
             {isAdmin && (
               <button
-                onClick={() => setShowSettingsPopup(true)}
-                className="relative w-10 h-10 bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 rounded-full flex items-center justify-center cursor-pointer transition shadow-lg"
-                title="Admin Settings"
+                onClick={() => setShowAdminPanel(!showAdminPanel)}
+                className="relative w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition shadow-md hover:shadow-lg"
+                style={{ background: showAdminPanel ? BRAND.primary : BRAND.gradient }}
+                title="Admin Control Panel"
               >
                 <Settings className="text-white w-5 h-5" />
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center border-2 border-white">
                   {quickStats.totalUsers}
                 </span>
               </button>
@@ -1103,16 +611,17 @@ export default function AdminLayout({ children }) {
 
             <div
               onClick={handleLogout}
-              className="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center cursor-pointer transition"
+              className="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition hover:shadow-md"
+              style={{ background: `${BRAND.primary}15` }}
             >
-              <LogOut className="text-gray-600 w-5 h-5" />
+              <LogOut className="w-5 h-5" style={{ color: BRAND.primary }} />
             </div>
           </div>
         </div>
       </header>
 
       {/* Top Navigation Bar */}
-      <nav className="text-white sticky top-[64px] z-40 shadow-lg" style={{ background: 'linear-gradient(90deg, #2d5c3c 0%, #4a7c59 60%, #6aad7c 100%)' }}>
+      <nav className="text-white sticky top-[64px] z-40 shadow-lg" style={{ background: BRAND.gradient }}>
         <div className="flex items-center overflow-x-auto scrollbar-thin scrollbar-thumb-white/30 scrollbar-track-white/10">
           {topNavRoutes
             .filter((route) => {
@@ -1134,13 +643,310 @@ export default function AdminLayout({ children }) {
         </div>
       </nav>
 
+      {/* Admin Panel - Compact View at Top (Before Welcome Section) */}
+      {showAdminPanel && isAdmin && (
+        <div className="bg-white border-b border-gray-200 shadow-sm">
+          <div className="container mx-auto px-4 py-4">
+            {/* Header with Tabs */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${BRAND.primary}15` }}>
+                  <Settings className="w-4 h-4" style={{ color: BRAND.primary }} />
+                </div>
+                <h2 className="text-lg font-bold" style={{ color: BRAND.primaryDark }}>Admin Control Panel</h2>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={refreshData}
+                  className="p-2 rounded-lg hover:bg-gray-100 transition"
+                  title="Refresh Data"
+                >
+                  <RefreshCw className="w-4 h-4" style={{ color: BRAND.primary }} />
+                </button>
+                <button
+                  onClick={() => setShowAdminPanel(false)}
+                  className="p-2 rounded-lg hover:bg-gray-100 transition"
+                >
+                  <X className="w-4 h-4 text-gray-500" />
+                </button>
+              </div>
+            </div>
+
+            {/* Compact Tabs */}
+            <div className="flex gap-2 mb-4">
+              {[
+                { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
+                { id: 'users', label: 'Users', icon: Users },
+                { id: 'systems', label: 'Systems', icon: Database }
+              ].map(tab => {
+                const Icon = tab.icon;
+                const isActive = settingsView === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setSettingsView(tab.id)}
+                    className={`px-4 py-2 rounded-lg font-medium transition flex items-center gap-2 text-sm ${isActive
+                      ? 'text-white shadow-sm'
+                      : 'text-gray-600 hover:bg-gray-100'
+                      }`}
+                    style={isActive ? { background: BRAND.gradient } : {}}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {tab.label}
+                    {tab.id === 'users' && (
+                      <span className={`ml-1 px-1.5 py-0.5 rounded-full text-xs ${isActive ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-600'}`}>
+                        {quickStats.totalUsers}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Dashboard View - Compact Stats Grid */}
+            {settingsView === "dashboard" && (
+              <div className="space-y-4">
+                {/* Stats Grid - 4 columns */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <CompactStatCard
+                    icon={Users}
+                    label="Total Users"
+                    value={quickStats.totalUsers}
+                    color={BRAND.primary}
+                  />
+                  <CompactStatCard
+                    icon={Database}
+                    label="Total Systems"
+                    value={quickStats.totalSystems}
+                    color="#3b82f6"
+                    bgColor="#eef2ff"
+                  />
+                  <CompactStatCard
+                    icon={Shield}
+                    label="Admin Users"
+                    value={quickStats.adminUsers}
+                    color="#8b5cf6"
+                    bgColor="#f5f3ff"
+                  />
+                  <CompactStatCard
+                    icon={Target}
+                    label="Avg Apps/User"
+                    value={quickStats.avgAppsPerUser}
+                    color={BRAND.accent}
+                    bgColor={`${BRAND.accent}15`}
+                  />
+                </div>
+
+                {/* Quick Actions - Horizontal */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      setSettingsView("users");
+                      setShowUserModal(true);
+                    }}
+                    className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg hover:shadow-sm transition text-sm"
+                  >
+                    <UserPlus className="w-4 h-4" style={{ color: BRAND.primary }} />
+                    <span>Add User</span>
+                  </button>
+                  <button
+                    onClick={() => setSettingsView("systems")}
+                    className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg hover:shadow-sm transition text-sm"
+                  >
+                    <Database className="w-4 h-4" style={{ color: BRAND.primary }} />
+                    <span>View Systems</span>
+                  </button>
+                  <span className="text-xs text-gray-500 ml-auto">
+                    Last updated: {new Date().toLocaleTimeString()}
+                  </span>
+                </div>
+
+                {/* Recent Users - Compact List */}
+                <div>
+                  <h3 className="text-sm font-semibold mb-2" style={{ color: BRAND.primaryDark }}>Recent Users</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                    {allUsers.slice(0, 3).map(user => {
+                      const empD = findEmployeeData(user.employee_code || user.username);
+                      const photoUrl = empD ? getDriveDirectUrl(empD["Candidate's Photo"] || empD.photo || '') : null;
+                      const appCount = userAccessStats[user.username]?.accessibleApps || 0;
+                      return (
+                        <div key={user.username} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full overflow-hidden border" style={{ borderColor: BRAND.primary }}>
+                              <img
+                                src={photoUrl || getFallbackAvatar(user.name, 32)}
+                                alt={user.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  e.target.src = getFallbackAvatar(user.name, 32);
+                                }}
+                              />
+                            </div>
+                            <div>
+                              <p className="text-xs font-semibold">{user.name}</p>
+                              <p className="text-xs text-gray-500">{appCount} apps</p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => { setSelectedUserForAccess(user); setShowAccessModal(true); }}
+                            className="p-1 hover:bg-gray-200 rounded"
+                          >
+                            <Edit2 className="w-3 h-3" style={{ color: BRAND.primary }} />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Users View - Compact Table */}
+            {settingsView === "users" && (
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="relative flex-1 max-w-xs">
+                    <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Search users..."
+                      className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm w-full"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+                  <select
+                    className="px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                    value={filterRole}
+                    onChange={(e) => setFilterRole(e.target.value)}
+                  >
+                    <option value="all">All Roles</option>
+                    <option value="admin">Admin</option>
+                    <option value="user">User</option>
+                    <option value="hr">HR</option>
+                    <option value="store">Store</option>
+                    <option value="accounts">Accounts</option>
+                  </select>
+                  <button
+                    onClick={() => {
+                      setEditingUser(null);
+                      setShowUserModal(true);
+                    }}
+                    className="px-3 py-2 text-white rounded-lg text-sm flex items-center gap-2"
+                    style={{ background: BRAND.gradient }}
+                  >
+                    <UserPlus className="w-4 h-4" />
+                    Add
+                  </button>
+                </div>
+
+                <div className="border border-gray-200 rounded-lg overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr style={{ background: BRAND.gradient }}>
+                        <th className="px-3 py-2 text-left text-xs text-white">User</th>
+                        <th className="px-3 py-2 text-left text-xs text-white">Role</th>
+                        <th className="px-3 py-2 text-left text-xs text-white">Access</th>
+                        <th className="px-3 py-2 text-left text-xs text-white">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {filteredUsers.slice(0, 5).map(user => (
+                        <tr key={user.username} className="hover:bg-gray-50">
+                          <td className="px-3 py-2">
+                            <div className="flex items-center gap-2">
+                              <div className="w-6 h-6 rounded-full overflow-hidden border" style={{ borderColor: BRAND.primary }}>
+                                <img
+                                  src={getFallbackAvatar(user.name, 24)}
+                                  alt={user.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <div>
+                                <p className="font-medium text-xs">{user.name}</p>
+                                <p className="text-xs text-gray-500">{user.username}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-3 py-2">
+                            <span className="px-2 py-1 rounded-full text-xs font-medium" style={{ background: `${BRAND.primary}15`, color: BRAND.primary }}>
+                              {user.role || 'user'}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2">
+                            <span className="font-semibold" style={{ color: BRAND.primary }}>
+                              {userAccessStats[user.username]?.accessibleApps || 0}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2">
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => { setEditingUser(user); setShowUserModal(true); }}
+                                className="p-1 hover:bg-gray-100 rounded"
+                              >
+                                <Edit className="w-3 h-3" style={{ color: BRAND.primary }} />
+                              </button>
+                              <button
+                                onClick={() => { setSelectedUserForAccess(user); setShowAccessModal(true); }}
+                                className="p-1 hover:bg-gray-100 rounded"
+                              >
+                                <Settings className="w-3 h-3" style={{ color: BRAND.primary }} />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteUser(user.username)}
+                                className="p-1 hover:bg-red-50 rounded"
+                              >
+                                <Trash2 className="w-3 h-3 text-red-500" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {filteredUsers.length > 5 && (
+                    <div className="p-2 text-center border-t">
+                      <button className="text-xs font-medium" style={{ color: BRAND.primary }}>
+                        View all {filteredUsers.length} users
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Systems View - Compact Grid */}
+            {settingsView === "systems" && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                {allApps.slice(0, 4).map(app => (
+                  <div key={app.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Database className="w-3 h-3" style={{ color: BRAND.primary }} />
+                      <span className="text-xs font-medium truncate">{app.label || app.name}</span>
+                    </div>
+                    <p className="text-xs text-gray-500 truncate">{app.url}</p>
+                  </div>
+                ))}
+                {allApps.length > 4 && (
+                  <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-center">
+                    <span className="text-xs font-medium" style={{ color: BRAND.primary }}>
+                      +{allApps.length - 4} more
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
-        <main className="flex-1 overflow-y-auto bg-white">
+        <main className="flex-1 overflow-y-auto">
           {isAdmin && showAdminDashboard && (
             <div className="p-4">
               <div className="max-w-7xl mx-auto">
-
                 <HomePage />
               </div>
             </div>
@@ -1154,9 +960,9 @@ export default function AdminLayout({ children }) {
                 {/* Loading indicator */}
                 <div id="iframe-loader" className="absolute inset-0 flex items-center justify-center bg-gray-50 z-10">
                   <div className="text-center">
-                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                    <p className="mt-2 text-sm text-gray-600">Loading application...</p>
-                    <p className="text-xs text-gray-400 mt-1">Auto-login in progress...</p>
+                    <div className="animate-spin rounded-full h-8 w-8 border-2 border-t-transparent mx-auto" style={{ borderColor: BRAND.primary, borderTopColor: 'transparent' }}></div>
+                    <p className="mt-2 text-sm font-medium" style={{ color: BRAND.primary }}>Loading application...</p>
+                    <p className="text-xs text-gray-500 mt-1">Auto-login in progress...</p>
                   </div>
                 </div>
 
@@ -1168,68 +974,46 @@ export default function AdminLayout({ children }) {
                   allow="*"
                   allowFullScreen
                   onLoad={() => {
-                    // Hide loader when iframe loads
                     document.getElementById('iframe-loader').style.display = 'none';
-
-                    // Try to inject auto-login script
-                    setTimeout(() => {
-                      try {
-                        // SSO injection attempt (cross-origin may block this)
-                      } catch (e) {
-                        // cross-origin restriction
-                      }
-                    }, 1000);
                   }}
                   onError={() => {
                     document.getElementById('iframe-loader').style.display = 'none';
                     showToast('Failed to load application', 'error');
                   }}
                 />
-
-                {/* Hidden form for auto-submit (fallback) */}
-                <form
-                  id="sso-auto-form"
-                  method="POST"
-                  target="external-iframe"
-                  style={{ display: 'none' }}
-                >
-                  <input type="hidden" name="sso_token" value={localStorage.getItem('sso_token') || ''} />
-                  <input type="hidden" name="username" value={localStorage.getItem('user-name') || ''} />
-                  <input type="hidden" name="auto_login" value="true" />
-                  <input type="hidden" name="source" value="master_dashboard" />
-                </form>
               </div>
             </div>
           )}
         </main>
       </div>
 
-
-      {/* Settings Popup */}
-      {showSettingsPopup && <SettingsPopup />}
-
       {/* User Modal */}
       {showUserModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
-          <div className="bg-white w-full max-w-lg rounded-xl shadow-lg overflow-hidden">
-            <div className="p-6 border-b border-gray-200">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[110] p-4">
+          <div className="bg-white w-full max-w-lg rounded-xl shadow-2xl overflow-hidden">
+            <div className="p-4 border-b border-gray-200" style={{ background: BRAND.gradient }}>
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900">
-                  {editingUser ? "Edit User" : "Create New User"}
-                </h2>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                    {editingUser ? <Edit className="w-4 h-4 text-white" /> : <UserPlus className="w-4 h-4 text-white" />}
+                  </div>
+                  <h2 className="text-lg font-bold text-white">
+                    {editingUser ? "Edit User" : "Create New User"}
+                  </h2>
+                </div>
                 <button
                   onClick={() => {
                     setShowUserModal(false);
                     setEditingUser(null);
                   }}
-                  className="p-2 hover:bg-gray-100 rounded-lg"
+                  className="p-1 hover:bg-white/20 rounded-lg transition"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-5 h-5 text-white" />
                 </button>
               </div>
             </div>
 
-            <div className="p-6">
+            <div className="p-4">
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -1246,44 +1030,44 @@ export default function AdminLayout({ children }) {
                   handleSaveUser(userData);
                 }}
               >
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
                       Employee Code <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
                       name="employee_code"
                       defaultValue={editingUser?.employee_code}
-                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
                       placeholder="e.g., PMMPL-1"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
                       Full Name <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
                       name="name"
                       defaultValue={editingUser?.name}
-                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
                       placeholder="e.g., John Doe"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
                       Username <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
                       name="username"
                       defaultValue={editingUser?.username}
-                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
                       placeholder="e.g., john.doe"
                       required
                       disabled={!!editingUser}
@@ -1291,16 +1075,15 @@ export default function AdminLayout({ children }) {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Password <span className="text-red-500">*</span>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      Password {!editingUser && <span className="text-red-500">*</span>}
                     </label>
                     <div className="relative">
                       <input
                         type={showPassword ? "text" : "password"}
                         name="password"
-                        defaultValue=""
-                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 pr-10"
-                        placeholder="Enter password"
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm pr-10"
+                        placeholder={editingUser ? "Leave blank to keep unchanged" : "Enter password"}
                         required={!editingUser}
                       />
                       <button
@@ -1308,20 +1091,20 @@ export default function AdminLayout({ children }) {
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
                       >
-                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
                         Role <span className="text-red-500">*</span>
                       </label>
                       <select
                         name="role"
                         defaultValue={editingUser?.role || 'user'}
-                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
                       >
                         <option value="user">User</option>
                         <option value="admin">Admin</option>
@@ -1333,35 +1116,36 @@ export default function AdminLayout({ children }) {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
                         Department
                       </label>
                       <input
                         type="text"
                         name="department"
                         defaultValue={editingUser?.department}
-                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                        placeholder="e.g., Human Resources"
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                        placeholder="e.g., HR"
                       />
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-6 flex justify-end gap-3">
+                <div className="mt-4 flex justify-end gap-2">
                   <button
                     type="button"
                     onClick={() => {
                       setShowUserModal(false);
                       setEditingUser(null);
                     }}
-                    className="px-4 py-2 border rounded-lg hover:bg-gray-50"
+                    className="px-4 py-2 border border-gray-200 rounded-lg text-sm hover:bg-gray-50"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isSavingSystem}
-                    className="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 disabled:opacity-50 flex items-center gap-2"
+                    className="px-4 py-2 text-white rounded-lg text-sm hover:opacity-90 disabled:opacity-50 flex items-center gap-2"
+                    style={{ background: BRAND.gradient }}
                   >
                     {isSavingSystem ? (
                       <>
@@ -1371,12 +1155,12 @@ export default function AdminLayout({ children }) {
                     ) : editingUser ? (
                       <>
                         <Save className="w-4 h-4" />
-                        Update User
+                        Update
                       </>
                     ) : (
                       <>
                         <UserPlus className="w-4 h-4" />
-                        Create User
+                        Create
                       </>
                     )}
                   </button>
@@ -1389,16 +1173,16 @@ export default function AdminLayout({ children }) {
 
       {/* Access Modal */}
       {showAccessModal && selectedUserForAccess && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
-          <div className="bg-white w-full max-w-2xl rounded-xl shadow-lg overflow-hidden">
-            <div className="p-6 border-b border-gray-200">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[110] p-4">
+          <div className="bg-white w-full max-w-2xl rounded-xl shadow-2xl overflow-hidden">
+            <div className="p-4 border-b border-gray-200" style={{ background: BRAND.gradient }}>
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">
-                    System Access for {selectedUserForAccess.name}
+                  <h2 className="text-lg font-bold text-white">
+                    System Access
                   </h2>
-                  <p className="text-sm text-gray-600">
-                    Currently has {userAccessStats[selectedUserForAccess.username]?.accessibleApps || 0} systems
+                  <p className="text-green-100 text-xs mt-1">
+                    {selectedUserForAccess.name} • {userAccessStats[selectedUserForAccess.username]?.accessibleApps || 0} systems
                   </p>
                 </div>
                 <button
@@ -1406,77 +1190,62 @@ export default function AdminLayout({ children }) {
                     setShowAccessModal(false);
                     setSelectedUserForAccess(null);
                   }}
-                  className="p-2 hover:bg-gray-100 rounded-lg"
+                  className="p-1 hover:bg-white/20 rounded-lg transition"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-5 h-5 text-white" />
                 </button>
               </div>
             </div>
 
-            <div className="p-6 max-h-[60vh] overflow-y-auto">
-              <div className="mb-4">
-                <p className="text-sm text-gray-600">
-                  Select/deselect systems for <span className="font-semibold">{selectedUserForAccess.username}</span>
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="p-4 max-h-96 overflow-y-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {allApps.map((app) => (
                   <div
                     key={app.id}
                     onClick={() => handleAppSelection(app.id)}
-                    className={`p-3 border rounded-lg cursor-pointer transition ${selectedApps.includes(app.id)
-                      ? "border-sky-500 bg-gradient-to-r from-sky-50 to-blue-50"
-                      : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                    className={`p-2 border rounded-lg cursor-pointer transition text-sm ${selectedApps.includes(app.id)
+                      ? "border-2"
+                      : "border-gray-200 hover:border-gray-300"
                       }`}
+                    style={selectedApps.includes(app.id) ? { borderColor: BRAND.primary, background: `${BRAND.primary}10` } : {}}
                   >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-5 h-5 rounded border flex items-center justify-center ${selectedApps.includes(app.id)
-                        ? "bg-sky-500 border-sky-500"
-                        : "bg-white border-gray-300"
-                        }`}>
-                        {selectedApps.includes(app.id) && (
-                          <Check className="w-3 h-3 text-white" />
-                        )}
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`w-4 h-4 rounded border flex items-center justify-center ${selectedApps.includes(app.id) ? "text-white" : "bg-white border-gray-300"}`}
+                        style={selectedApps.includes(app.id) ? { background: BRAND.primary, borderColor: BRAND.primary } : {}}
+                      >
+                        {selectedApps.includes(app.id) && <Check className="w-3 h-3 text-white" />}
                       </div>
-                      <div className="flex-1">
-                        <div className="font-medium text-gray-900">{app.label || app.name}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-xs truncate">{app.label || app.name}</div>
                         <div className="text-xs text-gray-500 truncate">{app.url}</div>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
-
-              {allApps.length === 0 && (
-                <div className="text-center py-8">
-                  <Database className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                  <p className="text-gray-500">No systems available</p>
-                </div>
-              )}
             </div>
 
-            <div className="p-6 border-t border-gray-200">
+            <div className="p-4 border-t border-gray-200">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">
-                    Selected: <span className="font-medium text-sky-600">{selectedApps.length} systems</span>
-                  </p>
-                </div>
-                <div className="flex gap-3">
+                <span className="text-xs text-gray-600">
+                  Selected: <span className="font-semibold" style={{ color: BRAND.primary }}>{selectedApps.length} systems</span>
+                </span>
+                <div className="flex gap-2">
                   <button
                     onClick={() => {
                       setShowAccessModal(false);
                       setSelectedUserForAccess(null);
                     }}
-                    className="px-4 py-2 border rounded-lg hover:bg-gray-50"
+                    className="px-4 py-2 border border-gray-200 rounded-lg text-sm hover:bg-gray-50"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleAssignAccess}
                     disabled={isSavingSystem}
-                    className="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 disabled:opacity-50 flex items-center gap-2"
+                    className="px-4 py-2 text-white rounded-lg text-sm hover:opacity-90 disabled:opacity-50 flex items-center gap-2"
+                    style={{ background: BRAND.gradient }}
                   >
                     {isSavingSystem ? (
                       <>
@@ -1486,7 +1255,7 @@ export default function AdminLayout({ children }) {
                     ) : (
                       <>
                         <Check className="w-4 h-4" />
-                        Save Access
+                        Save
                       </>
                     )}
                   </button>
@@ -1500,11 +1269,11 @@ export default function AdminLayout({ children }) {
       {/* Toast Notification */}
       {toast.show && (
         <div
-          className={`fixed top-5 right-5 z-[9999] px-4 py-3 rounded-lg shadow-lg text-white text-sm flex items-center gap-2 animate-slide-in-right ${toast.type === "success" ? "bg-green-600" : "bg-red-600"
-            }`}
+          className="fixed top-5 right-5 z-[9999] px-4 py-3 rounded-lg shadow-lg text-white text-sm flex items-center gap-2 animate-slide-in-right"
+          style={{ background: toast.type === "success" ? BRAND.primary : '#ef4444' }}
         >
           {toast.type === "success" ? (
-            <Check className="w-4 h-4" />
+            <CheckCircle2 className="w-4 h-4" />
           ) : (
             <XCircle className="w-4 h-4" />
           )}
